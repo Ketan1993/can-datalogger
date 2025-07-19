@@ -6,61 +6,62 @@ from typing import Any, Optional
 from ctypes import *
 from ctypes.util import find_library
 import logging
-import platform
 
 #import module
 from my_package import(
     BusABC
 )
 
-#get the platform type
-PLATFORM = platform.system()
-IS_WINDOWS = PLATFORM == "Windows"
+from .pbasic import(
+    PCAN_ERROR_OK,
+    PCAN_BITRATES,
+    PCAN_CHANNEL_NAMES,
+    PCANHardware
+)
 
 logger = logging.getLogger(__name__)
 
-"""PCAN Hardware class. 
-   provide information about the PCAN Hardware like status of the deivce, provide API to read or write to hardware.
-"""
-class PCANHardware():
-    def __init__(self):
-    
-        """Initialize with type of platform"""
-    
-        if IS_WINDOWS:
-            load_libray_func = windll.LoadLibrary 
-            lib_name         = "PCANBasic"      
-
-        """let's find the PCANBasic dll library on system, which is provided by the PCAN hardware maker.
-        """
-        lib_path = find_library(lib_name)
-        
-        if not lib_path:
-            raise OSError(f"'{lib_name}' not found in system")
-        
-        #load the PCANBasic.dll library from the system
-        try:
-            #this approch is equivalent to windll.LoadLibrary("PCANBasic") method
-            self._m_ddlbasic = load_libray_func(lib_path)
-        except OSError:
-            raise OSError(f"PCAN Basic Library could not loaded. '{lib_path}'")
-
-    def Initialize():
-        logger.info(f"PCAN Hardware Initialization")
-
 class PcanBus(BusABC):
     def __init__(self,
-                 channel: str = "PCAN",
+                 Channel: str = "PCAN_USBBUS1",
+                 bitrate: int = 5000000,
                  device_id: Optional[int] = None,
                  **kwargs: Any):
        
+       """
+          A PCAN USB Interface to CAN
+
+          A top level class.
+
+          parameters:
+                Channel         : The can interface name. An example would be "PCAN_USBBUS1"
+                bitrate         : The speed of the communication. Example. 250Kbps, 1Mbps etc.
+                                  default is 500 bit/s.
+                                
+       """
+       
        logger.info("__init__ of PcanBus class initialize..")
+       
+       #Initialize the PCAN Hardware instance
        self.__mHardwareObject = PCANHardware()
+       #get Channel Number
+       self.__mChannel = PCAN_CHANNEL_NAMES.get(Channel)
+       
+       if self.__mChannel is None:
+           err_msg = f"Cannot find a '{Channel}' Channel from supported Channel.."
+           raise ValueError(err_msg)
+       
+       #get bit-rate 
+       self.__pcan_bitrate = PCAN_BITRATES.get(bitrate)
 
-       self._device_id = device_id
-       logger.info(f"channel name: '{channel}'")
+       logger.info(f"PCAN Channel : '{self.__mChannel}' PCAN bitrate: '{self.__pcan_bitrate}' ")
 
-       super().__init__(channel=channel, **kwargs)
+       result = self.__mHardwareObject.Initialize(self.__mChannel, self.__pcan_bitrate)
+       
+       if result != PCAN_ERROR_OK:
+           logger.error(f"'{self._get_formatted_error(result)}'")
+       
+       super().__init__(channel=Channel, **kwargs)
 
     def open_connection(self, port, baudrate):
         logger.info("open connection")
@@ -70,4 +71,17 @@ class PcanBus(BusABC):
     
     def status(self):
         logger.info("status")
+    
+    def _get_formatted_error(self, Error):
+        """
+        Help Function used to get error in text
+
+        """
+        strReturn = self.__mHardwareObject.GetErrorText(Error, 0x09)
+        if strReturn[0] != PCAN_ERROR_OK:
+            return "An error occurred. Error-code's text ({0:X}h) couldn't be retrieved".format(Error)
+        else:
+            message = str(strReturn[1])
+            return message.replace("'","",2).replace("b","",1)
+
         

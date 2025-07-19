@@ -6,7 +6,7 @@ def main():
     print("Testing the ABC class and method..")
         
     # Get a CAN bus instance (assuming a CAN bus implementation exists)
-    can_bus = Bus(interface="pcan", channel="PCANUSB1", bitrate=500000)
+    can_bus = Bus(interface="pcan", channel="PCAN_USBBUS1", bitrate=500000)
 
     if can_bus:
         can_bus.status()
