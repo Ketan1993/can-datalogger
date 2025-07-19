@@ -45,7 +45,8 @@ class PCANHardware():
         except OSError:
             raise OSError(f"PCAN Basic Library could not loaded. '{lib_path}'")
 
-
+    def Initialize():
+        logger.info(f"PCAN Hardware Initialization")
 
 class PcanBus(BusABC):
     def __init__(self,
