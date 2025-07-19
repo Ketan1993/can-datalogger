@@ -1,3 +1,3 @@
-__all__ = ["PcanBus", "pcan"]
+__all__ = ["PcanBus", "pbasic", "pcan"]
 
 from my_package.interfaces.pcan.pcan import PcanBus
