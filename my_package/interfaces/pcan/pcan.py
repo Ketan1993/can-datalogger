@@ -27,6 +27,7 @@ TPCANType = c_ubyte  # Represents the type of PCAN hardware to be initialized
 
 # PCAN devices
 #
+TPCANHandle = c_ushort  # Represents a PCAN hardware channel handle
 PCAN_NONE = TPCANDevice(0x00)  # Undefined, unknown or not selected PCAN device value
 PCAN_PEAKCAN = TPCANDevice(0x01)  # PCAN Non-PnP devices. NOT USED WITHIN PCAN-Basic API
 PCAN_ISA = TPCANDevice(0x02)  # PCAN-ISA, PCAN-PC/104, and PCAN-PC/104-Plus
@@ -35,9 +36,12 @@ PCAN_PCI = TPCANDevice(0x04)  # PCAN-PCI, PCAN-cPCI, PCAN-miniPCI, and PCAN-PCI 
 PCAN_USB = TPCANDevice(0x05)  # PCAN-USB and PCAN-USB Pro
 PCAN_PCC = TPCANDevice(0x06)  # PCAN-PC Card
 
+#PCAN Channel
+PCAN_USBBUS1 = TPCANHandle(0x51)  # PCAN-USB interface, channel 1
+
+#Baud rate codes = BTR0/BTR1 register values for the CAN controller.
 PCAN_BAUD_500K = TPCANBaudrate(0x001C)  # 500 kBit/s
 PCAN_BAUD_250K = TPCANBaudrate(0x011C)  # 250 kBit/s
-
 
 #PCAN Error code
 PCAN_ERROR_OK = TPCANStatus(0x00000)  # No error
@@ -45,6 +49,10 @@ PCAN_ERROR_OK = TPCANStatus(0x00000)  # No error
 PCAN_BITRATES = {
     500000 : PCAN_BAUD_500K,
     250000 : PCAN_BAUD_250K,
+}
+
+PCAN_CHANNEL_NAMES = {
+    "PCAN_USBBUS1" : PCAN_USBBUS1
 }
 
 class PCANHardware():
@@ -98,7 +106,7 @@ class PCANHardware():
         
         """
         try:
-            ret = self._m_ddlbasic.CAN_Initialize(Channel, Btr0Btr1,hWType,IOPort,Interrupt)
+            ret = self._m_ddlbasic.CAN_Initialize(Channel,Btr0Btr1,hWType,IOPort,Interrupt)
             return TPCANStatus(ret)
         except:
             print("Failed to Initialize the PCAN Driver..")
@@ -117,7 +125,7 @@ class PCANHardware():
 
 class PcanBus(BusABC):
     def __init__(self,
-                 channel: str = "PCAN_USBBUS1",
+                 Channel: str = "PCAN_USBBUS1",
                  bitrate: int = 5000000,
                  device_id: Optional[int] = None,
                  **kwargs: Any):
@@ -128,7 +136,7 @@ class PcanBus(BusABC):
           A top level class.
 
           parameters:
-                channel         : The can interface name. An example would be "PCAN_USBBUS1"
+                Channel         : The can interface name. An example would be "PCAN_USBBUS1"
                 bitrate         : The speed of the communication. Example. 250Kbps, 1Mbps etc.
                                   default is 500 bit/s.
                                 
@@ -138,22 +146,23 @@ class PcanBus(BusABC):
        
        #Initialize the PCAN Hardware instance
        self.__mHardwareObject = PCANHardware()
-
-       self.__mChannel = channel
+         
+       self.__mChannel = PCAN_CHANNEL_NAMES.get(Channel)
        
-       hwtype = PCAN_USB
-       ioport = 0x02A0
-       interrupt = 11
+       if self.__mChannel is None:
+           err_msg = f"Cannot find a '{Channel}' Channel from supported Channel.."
+           raise ValueError(err_msg)
+       
+       self.__pcan_bitrate = PCAN_BITRATES.get(bitrate, PCAN_BAUD_500K)
 
-       #call PCAN Initilization function
-       pcan_bitrate = PCAN_BITRATES.get(bitrate, PCAN_BAUD_250K)
-       logger.info(f"PCAN Channel : '{self.__mChannel}' PCAN bitrate: '{bitrate}', Hardware Type: '{hwtype}' ")
-       result = self.__mHardwareObject.Initialize(self.__mChannel,pcan_bitrate,hwtype,ioport,interrupt)
+       logger.info(f"PCAN Channel : '{self.__mChannel}' PCAN bitrate: '{self.__pcan_bitrate}' ")
+
+       result = self.__mHardwareObject.Initialize(self.__mChannel, self.__pcan_bitrate)
        
        if result != PCAN_ERROR_OK:
            logger.error(f"'{self._get_formatted_error(result)}'")
        
-       super().__init__(channel=channel, **kwargs)
+       super().__init__(channel=Channel, **kwargs)
 
     def open_connection(self, port, baudrate):
         logger.info("open connection")
@@ -164,14 +173,14 @@ class PcanBus(BusABC):
     def status(self):
         logger.info("status")
     
-    def _get_formatted_error(self, error):
+    def _get_formatted_error(self, Error):
         """
         Help Function used to get error in text
 
         """
-        strReturn = self.__mHardwareObject.GetErrorText(error, 0x09)
+        strReturn = self.__mHardwareObject.GetErrorText(Error, 0x09)
         if strReturn[0] != PCAN_ERROR_OK:
-            return "An error occurred. Error-code's text ({0:X}h) couldn't be retrieved".format(error)
+            return "An error occurred. Error-code's text ({0:X}h) couldn't be retrieved".format(Error)
         else:
             message = str(strReturn[1])
             return message.replace("'","",2).replace("b","",1)
