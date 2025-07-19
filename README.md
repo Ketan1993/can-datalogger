@@ -1,1 +1,2 @@
-# can-datalogger
+# can-datalogger repository
+## setup
