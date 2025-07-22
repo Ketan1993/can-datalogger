@@ -42,6 +42,10 @@ PCAN_CHANNEL_NAMES = {
     "PCAN_USBBUS1" : PCAN_USBBUS1
 }
 
+class TPCANMsg(Structure):
+    """Represents a CAN Message"""
+    _fields_ = [("ID", c_uint)]
+
 class PCANHardware():
     def __init__(self):
     
@@ -96,9 +100,79 @@ class PCANHardware():
             ret = self._m_ddlbasic.CAN_Initialize(Channel,Btr0Btr1,hWType,IOPort,Interrupt)
             return TPCANStatus(ret)
         except:
-            print("Failed to Initialize the PCAN Driver..")
+            print("Exception on pbasic.CAN_Initialize")
             raise
-    
+
+    def Uninitialize(self, Channel):
+        """Uninitialize PCAN Channel, Initialized by CAN_Initialize
+
+        Parameters:
+            Channel         : PCAN Handler
+        
+        Return:
+            A TPCANStatus error code
+        """
+        try:
+            ret = self._m_ddlbasic.CAN_Uninitialize(Channel)
+            return TPCANStatus(ret)
+        except:
+            print("Exception on pbasic.CAN_Uninitialize")
+            raise
+        
+    def Read(self, Channel):
+        """Read A CAN Message
+        
+        Parameters:
+            Channel         : PCAN Handler
+
+        Returns:
+            PCAN Read API return 3 tuple value
+            [0]: A TPCANStatus error code
+            [1]: A TPCANMsg structure with CAN Message
+            [2]: A TPCANTimestamp structure with time-stamp
+
+        """
+        try:
+            msg = TPCANMsg()
+            ret = self._m_ddlbasic.CAN_Read(Channel, byref(msg))
+            return TPCANStatus(ret), msg
+        except:
+            print("Exception on pbasic.CAN_Read")
+            raise
+
+    def Write(self, Channel, MessageBuffer):
+        """Transmits a CAN Message
+        
+        Parameters:
+            Channel         : PCAN Handler
+            MessageBuffer   : A Message representing the CAN Message
+        
+        Returns:
+            A TPCANStatus Error Code
+        """
+        try:
+            ret = self._m_ddlbasic.CAN_Write(Channel,byref(MessageBuffer))
+            return TPCANStatus(ret)
+        except:
+            print("Exception on pbasic.CAN_Write")
+            raise
+
+    def GetStatus(self, Channel):
+        """Get current status of the PCAN Device
+
+        Parameters:
+            Channel     :A PCAN Channel Handler
+        
+        Returns:
+            A TPCANStatus Error code
+        """
+        try:
+            ret = self._m_ddlbasic.CAN_GetStatus(Channel)
+            return TPCANStatus(ret)
+        except:
+            print("Exception on pbasic.CAN_GetStatus")
+            raise
+
     def GetErrorText(self, Error, Langauge = 0x09):
 
         try:
@@ -106,5 +180,5 @@ class PCANHardware():
             ret      = self._m_ddlbasic.CAN_GetErrorText(Error, Langauge, byref(mybuffer))
             return TPCANStatus(ret), mybuffer.value
         except:
-            print("Exception on PCANBasic.GetErrorText")
+            print("Exception on pbasic.GetErrorText")
             raise

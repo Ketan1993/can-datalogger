@@ -17,4 +17,5 @@ from .bus import BusABC
 from .exceptions import(
     ErrorHanler,
     InitializationError,
+    ValueErrorHandler,
 )
