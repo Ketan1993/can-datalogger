@@ -9,7 +9,8 @@ import logging
 
 #import module
 from my_package import(
-    BusABC
+    BusABC,
+    InitializationError,
 )
 
 from .pbasic import(
@@ -59,7 +60,7 @@ class PcanBus(BusABC):
        result = self.__mHardwareObject.Initialize(self.__mChannel, self.__pcan_bitrate)
        
        if result != PCAN_ERROR_OK:
-           logger.error(f"'{self._get_formatted_error(result)}'")
+           raise InitializationError(f"'{self._get_formatted_error(result)}'")
        
        super().__init__(channel=Channel, **kwargs)
 
