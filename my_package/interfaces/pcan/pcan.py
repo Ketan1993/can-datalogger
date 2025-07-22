@@ -60,7 +60,7 @@ class PcanBus(BusABC):
        result = self.__mHardwareObject.Initialize(self.__mChannel, self.__pcan_bitrate)
        
        if result != PCAN_ERROR_OK:
-           raise InitializationError(f"'{self._get_formatted_error(result)}'")
+           raise InitializationError(self._get_formatted_error(result), result)
        
        super().__init__(channel=Channel, **kwargs)
 
