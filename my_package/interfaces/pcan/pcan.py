@@ -11,6 +11,7 @@ import logging
 from my_package import(
     BusABC,
     InitializationError,
+    ValueErrorHandler,
 )
 
 from .pbasic import(
@@ -44,21 +45,23 @@ class PcanBus(BusABC):
        logger.info("__init__ of PcanBus class initialize..")
        
        #Initialize the PCAN Hardware instance
-       self.__mHardwareObject = PCANHardware()
-       #get Channel Number
-       self.__mChannel = PCAN_CHANNEL_NAMES.get(Channel)
+       self.m_objPCANHardware = PCANHardware()
+       self.m_PCANHandler = PCAN_CHANNEL_NAMES.get(Channel)
        
-       if self.__mChannel is None:
+       if self.m_PCANHandler is None:
            err_msg = f"Cannot find a '{Channel}' Channel from supported Channel.."
-           raise ValueError(err_msg)
+           raise ValueErrorHandler(err_msg)
        
        #get bit-rate 
-       self.__pcan_bitrate = PCAN_BITRATES.get(bitrate)
+       self._pcan_bitrate = PCAN_BITRATES.get(bitrate)
 
-       logger.info(f"PCAN Channel : '{self.__mChannel}' PCAN bitrate: '{self.__pcan_bitrate}' ")
-
-       result = self.__mHardwareObject.Initialize(self.__mChannel, self.__pcan_bitrate)
+       result = self.m_objPCANHardware.Initialize(self.m_PCANHandler, self._pcan_bitrate)
        
+       if result != PCAN_ERROR_OK:
+           raise InitializationError(self._get_formatted_error(result), result)
+       
+       #get channel status
+       result = self.m_objPCANHardware.GetStatus(self.m_PCANHandler)
        if result != PCAN_ERROR_OK:
            raise InitializationError(self._get_formatted_error(result), result)
        
@@ -71,14 +74,19 @@ class PcanBus(BusABC):
         logger.info("closing serial connection")
     
     def status(self):
-        logger.info("status")
+        """Query of PCAN Status
+        
+        returns:
+            PCAN Device status
+        """
+        return self.m_objPCANHardware.GetStatus(self.m_PCANHandler)
     
     def _get_formatted_error(self, Error):
         """
         Help Function used to get error in text
 
         """
-        strReturn = self.__mHardwareObject.GetErrorText(Error, 0x09)
+        strReturn = self.m_objPCANHardware.GetErrorText(Error, 0x09)
         if strReturn[0] != PCAN_ERROR_OK:
             return "An error occurred. Error-code's text ({0:X}h) couldn't be retrieved".format(Error)
         else:

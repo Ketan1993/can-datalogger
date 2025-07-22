@@ -7,5 +7,8 @@ class ErrorHanler(Exception):
         self.error_code = error_code
         super().__init__(message if error_code is None else f"{message} [Error Code] {error_code}")
 
+class ValueErrorHandler(ErrorHanler):
+    """Indicate an error while accessing the particular value"""
+
 class InitializationError(ErrorHanler):
-    """Indicate the Error while Initialization"""
+    """Indicate an Error while Initialization"""
