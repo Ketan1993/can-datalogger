@@ -1,12 +1,8 @@
 """Abstract class"""
 
 from abc import ABC, abstractmethod
-from typing import Any, Optional
+from typing import Any
 import logging
-
-from .exceptions import(
-    NotImplementedFunc,
-)
 
 #get current logger name
 logger = logging.getLogger(__name__)
@@ -27,15 +23,13 @@ class BusABC(ABC):
         logger.info(f"channel name: '{self.channel_info}'")
 
     @abstractmethod
-    def send(self, port, baudrate):
+    def open_connection(self, port, baudrate):
         """Abstract method for the open driver instance"""
         pass
 
-    def recv(self, timeout: Optional[float] = None):
-        self._recv_internal(timeout)
-        logger.info("closing serial connection in bus")
-
-    def _recv_internal(self, timeout:Optional[float]):
-        raise NotImplementedFunc("This is not implemented")
+    @abstractmethod
+    def close_connection(self):
+        """Abstract method for the close driver instance"""
+        pass
 
     
