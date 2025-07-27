@@ -8,7 +8,7 @@ from ctypes.util import find_library
 import logging
 
 #import module
-from my_package import(
+from pycan import(
     BusABC,
     InitializationError,
     ValueErrorHandler,
@@ -64,6 +64,12 @@ class PcanBus(BusABC):
        result = self.m_objPCANHardware.GetStatus(self.m_PCANHandler)
        if result != PCAN_ERROR_OK:
            raise InitializationError(self._get_formatted_error(result), result)
+       
+       result = self.m_objPCANHardware.Uninitialize(self.m_PCANHandler)
+       if result != PCAN_ERROR_OK:
+           raise InitializationError(self._get_formatted_error(result), result)
+       
+       self.m_objPCANHardware.Read(self.m_PCANHandler)
        
        super().__init__(channel=Channel, **kwargs)
 

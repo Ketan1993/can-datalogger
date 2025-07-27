@@ -1,0 +1,5 @@
+[project]
+name = "pycan"
+version = "0.0.1"
+description = "A python base CAN-DataLogger"
+readme = "README.md"
