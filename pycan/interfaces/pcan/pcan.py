@@ -87,6 +87,12 @@ class PcanBus(BusABC):
         """
         return self.m_objPCANHardware.GetStatus(self.m_PCANHandler)
     
+    def shutdown(self):
+        super().shutdown()
+
+        #uninitialize the PCAN Channel
+        self.m_objPCANHardware.Uninitialize(self.m_PCANHandler)
+
     def _get_formatted_error(self, Error):
         """
         Help Function used to get error in text
