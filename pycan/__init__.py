@@ -10,12 +10,14 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 # Define the public interface of this module
-__all__ = ["BusABC", "Bus" "interfaces" "interface", "exeptions"] # Only expose the abstract base class and the factory function
+__all__ = ["BusABC", "Bus", "bus", "interfaces" "interface", "exceptions"] # Only expose the abstract base class and the factory function
 
 from .bus import BusABC
+from .interface import Bus
 
 from .exceptions import(
     ErrorHanler,
     InitializationError,
     ValueErrorHandler,
+    NotImplementedFunc,
 )

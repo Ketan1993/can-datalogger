@@ -8,6 +8,6 @@ __all__ = [
 
 #intercace name = (module, classname)
 BACKENDS: dict[str, tuple[str, str]] = {
-    "pcan":("my_package.interfaces.pcan", "PcanBus"),
-    "serialcan":("my_package.interfaces.serialcan.serial_can", "SerialBus"),
+    "pcan":("pycan.interfaces.pcan", "PcanBus"),
+    "serialcan":("pycan.interfaces.serialcan.serial_can", "SerialBus"),
 }
