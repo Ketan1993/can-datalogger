@@ -14,12 +14,9 @@ class SerialBus(BusABC):
         
         logger.info("__init__ of SerialBus class initialize..")
     
-    def open_connection(self, port, baudrate):
+    def send(self, port, baudrate):
         logger.info("connection open")
-
-    def close_connection(self):
-        logger.info("closing serial connection")
-
+    
     def status(self):
         logger.info("status")
         
