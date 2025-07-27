@@ -16,7 +16,10 @@ Setup
 Example Uses
 ------------
 
+``pip install pycan``
+
 .. code:: python
+
     #import pycan module
     import pycan
 
