@@ -1,10 +1,12 @@
+"""PCAN Hardware level class.
+This class provide access to PCAN device to read and write the messages.
+This is basically provided by the PCAN device maker. 
+"""
+
 from ctypes import *
 from ctypes.util import find_library
 import platform
 
-"""PCAN Hardware class. 
-   provide information about the PCAN Hardware like status of the deivce, provide API to read or write to hardware.
-"""
 TPCANStatus = int  # Represents a PCAN status/error code
 TPCANDevice = c_ubyte  # Represents a PCAN device
 TPCANBaudrate = c_ushort  # Represents a PCAN Baud rate register value
@@ -173,11 +175,23 @@ class PCANHardware():
             print("Exception on pbasic.CAN_GetStatus")
             raise
 
-    def GetErrorText(self, Error, Langauge = 0x09):
+    def GetErrorText(self, Error, Language = 0x09):
+        """Get Error in text format.
+        
+        Parameters:
+            Error       : A TPCANStatus Error code
+            Language    : Indicate the Language Id. default (English : 0x09)
+        
+        Returns: 
+            A touple value with 2
+            [0]:    A TPCANStatus Error code
+            [1]:    Error in Text format
+        
+        """
 
         try:
             mybuffer = create_string_buffer(256)
-            ret      = self._m_ddlbasic.CAN_GetErrorText(Error, Langauge, byref(mybuffer))
+            ret      = self._m_ddlbasic.CAN_GetErrorText(Error, Language, byref(mybuffer))
             return TPCANStatus(ret), mybuffer.value
         except:
             print("Exception on pbasic.GetErrorText")

@@ -6,13 +6,8 @@ def main():
     print("Testing the ABC class and method..")
         
     # Get a CAN bus instance (assuming a CAN bus implementation exists)
-    can_bus = pycan.Bus(interface="pcan", channel="PCAN_USBBUS1", bitrate=500000)
+    with pycan.Bus(interface="pcan", channel="PCAN_USBBUS1", bitrate=500000) as bus:
+        bus.status()
 
-    if can_bus:
-        can_bus.status()
-        can_bus.recv(1)
-    else:
-        print("Failed to get bus instance.")
-    
 if __name__ == "__main__":
     main()
