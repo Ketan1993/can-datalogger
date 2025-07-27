@@ -7,6 +7,9 @@ class ErrorHanler(Exception):
         self.error_code = error_code
         super().__init__(message if error_code is None else f"{message} [Error Code] {error_code}")
 
+class NotImplementedFunc(ErrorHanler):
+    """Indicate an error while accessing not Implement function"""
+    
 class ValueErrorHandler(ErrorHanler):
     """Indicate an error while accessing the particular value"""
 
