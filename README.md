@@ -16,6 +16,20 @@ Setup
 Example Uses
 ------------
 
+``pip install pycan``
+
+.. code:: python
+
+    #import pycan module
+    import pycan
+
+    #Create a bus instance using 'with' statement.
+
+    with pycan.Bus(interface="pcan", channel="PCAN_USBBUS1", bitrate=500000) as bus:
+
+        bus.status()
+    
+
 Discussion
 ----------
 

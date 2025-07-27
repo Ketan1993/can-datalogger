@@ -10,9 +10,9 @@ def main():
 
     if can_bus:
         can_bus.status()
-        can_bus.recv(1)
+        can_bus.shutdown()
     else:
         print("Failed to get bus instance.")
-    
+
 if __name__ == "__main__":
     main()

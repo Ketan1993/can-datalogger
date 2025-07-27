@@ -15,16 +15,18 @@ logger = logging.getLogger(__name__)
 
 class BusABC(ABC):
 
-    #channel info
+    #private
     channel_info = "unknown"
+    _is_shutdown: bool = True
+
+    @abstractmethod
     def __init__(self, 
                  channel: Any,
                  **kwargs: object
                 ):
         
         self.channel_info = channel
-        logger.info("__init__ of BusABC class initialize..")
-        logger.info(f"channel name: '{self.channel_info}'")
+        self._is_shutdown = False
 
     @abstractmethod
     def send(self, port, baudrate):
@@ -39,3 +41,29 @@ class BusABC(ABC):
         raise NotImplementedFunc("This is not implemented")
 
     
+    def shutdown(self) -> None:
+
+        """Call shut-down process when bus instance exit from the block mode or clean-up request made
+        """
+        if self._is_shutdown:
+            logger.info("%s is already shut down", self.__class__)
+            return
+
+        self._is_shutdown = True
+
+    #To support the onject creation with `with statement`
+    def __enter__(self):
+        return self
+    
+    #To support the object creation with `with` statement    
+    def __exit__(self, exc_type,
+                 exc_val, exc_tb
+                ) -> None:
+        self.shutdown()
+        
+    #To support destructor clean up method
+    def __del__(self) -> None:
+        if not self._is_shutdown:
+            self.shutdown()
+
+
