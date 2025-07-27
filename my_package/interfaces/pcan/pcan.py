@@ -67,10 +67,10 @@ class PcanBus(BusABC):
        
        super().__init__(channel=Channel, **kwargs)
 
-    def open_connection(self, port, baudrate):
+    def send(self, port, baudrate):
         logger.info("open connection")
 
-    def close_connection(self):
+    def recv(self, timeout: Optional[float] = None):
         logger.info("closing serial connection")
     
     def status(self):
