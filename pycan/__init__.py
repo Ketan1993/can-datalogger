@@ -16,7 +16,7 @@ from .bus import BusABC
 from .interface import Bus
 
 from .exceptions import(
-    ErrorHanler,
+    ErrorHandler,
     InitializationError,
     ValueErrorHandler,
     NotImplementedFunc,

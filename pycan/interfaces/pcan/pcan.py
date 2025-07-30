@@ -41,9 +41,7 @@ class PcanBus(BusABC):
                                   default is 500 bit/s.
                                 
        """
-       
-       logger.info("__init__ of PcanBus class initialize..")
-       
+   
        #Initialize the PCAN Hardware instance
        self.m_objPCANHardware = PCANHardware()
        self.m_PCANHandler = PCAN_CHANNEL_NAMES.get(Channel)
