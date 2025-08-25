@@ -9,8 +9,9 @@ def main():
     can_bus = pycan.Bus(interface="pcan", channel="PCAN_USBBUS1", bitrate=500000)
 
     if can_bus:
-        can_bus.status()
         can_bus.shutdown()
+        can_bus.status()
+        
     else:
         print("Failed to get bus instance.")
 
